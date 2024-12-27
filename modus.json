@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schema.hypermode.com/modus.json",
+  "endpoints": {
+    "default": {
+      "type": "graphql",
+      "path": "/graphql",
+      "auth": "bearer-token"
+    }
+  },
+  "models": {
+    "text-generator": {
+      "sourceModel": "sentence-transformers/all-MiniLM-L6-v2",
+      "provider": "hugging-face",
+      "connection": "hypermode"
+    }
+  },
+  "connections": {
+    "discord": {
+      "type": "http",
+      "baseUrl": "https://discord.com/api/v10/channels/",
+      "headers": {
+        "Authorization": "{{TOKEN}}"
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "assemblyscript/std/assembly.json",
+  "include": ["./**/*.ts"],
+  "compilerOptions": {
+    "target": "es6", // or a later version
+    "module": "commonjs", // or another module system
+    "strict": true, // Enables all strict type checking options
+    "noImplicitAny": false // Allows implicit 'any' types
+  }
+}
