@@ -9,7 +9,7 @@
   },
   "models": {
     "text-generator": {
-      "sourceModel": "sentence-transformers/all-MiniLM-L6-v2",
+      "sourceModel": "meta-llama/Meta-Llama-3.1-8B-Instruct",
       "provider": "hugging-face",
       "connection": "hypermode"
     }
