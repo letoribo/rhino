@@ -15,6 +15,12 @@
     }
   },
   "connections": {
+    "neo4j": {
+      "type": "neo4j",
+      "dbUri": "{{URI}}",
+      "username": "{{USERNAME}}",
+      "password": "{{PASSWORD}}"
+    },
     "discord": {
       "type": "http",
       "baseUrl": "https://discord.com/api/v10/channels/",

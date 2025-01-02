@@ -1,5 +1,5 @@
 @json
-class Author {
+export class Author {
     global_name: string;
     username: string;
   
@@ -13,10 +13,15 @@ class Author {
 export class Message {
     content: string;
     author: Author;
+    type: i8;
+    timestamp: Date;
+    id: string;
 
-    constructor(content: string, author: Author) {
+    constructor(content: string, author: Author, type: i8, timestamp: Date, id: string) {
         this.content = content;
         this.author = author;
+        this.type = type;
+        this.timestamp = timestamp;
+        this.id = id;
     }
 }
-
