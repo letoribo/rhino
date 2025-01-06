@@ -80,7 +80,11 @@ export function addNode(content: string, author: Author, type: i8, timestamp: Da
   const record = result.Records[0];
   const node = record.getValue<neo4j.Node>('n');
 
-  const author2 = new Author(node.Props.get<string>("username"), node.Props.get<string>("username"))
+  console.log(`Id: ${node.Props.get<string>("id")}`);
+  console.log(`Content: ${node.Props.get<string>("content")}`);
+  console.log(`Keys: ${node.Props.keys()}`);
+  console.log(`Global_name: ${node.Props.get<string>("global_name")}`);
+  const author2 = new Author(node.Props.get<string>("username"), global_name)
   const message = new Message(node.Props.get<string>("content"), author2, node.Props.get<i8>("type"), node.Props.get<Date>("timestamp"), node.Props.get<string>("id"));
   return message;
 }
