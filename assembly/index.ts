@@ -1,4 +1,4 @@
-import { neo4j, models, http } from "@hypermode/modus-sdk-as";
+import { neo4j, models, http, DynamicMap } from "@hypermode/modus-sdk-as";
 import { Message, Author } from "./classes";
 import * as console from "as-console";
 import {
@@ -89,3 +89,13 @@ export function addNode(content: string, author: Author, type: i8, timestamp: Da
   return message;
 }
 
+export function getContent(): DynamicMap {
+  //const url = "https://discord.com/api/v10/channels/1292948253796466730/messages?around=1324297283382153218&limit=1"; //not working
+  const url = "https://discord.com/api/v10/channels/1292948253796466730/messages?around=1326277761093992520&limit=1"; //is OK
+    
+  const response = http.fetch(url);
+  const data = response.json<JSON.Raw>(); console.log(data);
+
+  const m = JSON.parse<DynamicMap>(data);
+  return m
+}
