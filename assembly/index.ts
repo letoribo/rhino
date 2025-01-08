@@ -91,7 +91,7 @@ export function addNode(content: string, author: Author, type: i8, timestamp: Da
 
 export function getContent(): DynamicMap {
   //const url = "https://discord.com/api/v10/channels/1292948253796466730/messages?around=1324297283382153218&limit=1"; //not working
-  const url = "https://discord.com/api/v10/channels/1292948253796466730/messages?around=1326277761093992520&limit=1"; //is OK
+  const url = "https://discord.com/api/v10/channels/1292948253796466730/messages?around=1326277761093992520&limit=1"; //not working
     
   const response = http.fetch(url);
   const data = response.json<JSON.Raw>(); console.log(data);
