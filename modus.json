@@ -17,7 +17,7 @@
   "connections": {
     "neo4j": {
       "type": "neo4j",
-      "dbUri": "{{URI}}",
+      "dbUri": "neo4j+s://98ba549d.databases.neo4j.io",
       "username": "{{USERNAME}}",
       "password": "{{PASSWORD}}"
     },
