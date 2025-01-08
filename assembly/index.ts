@@ -1,5 +1,5 @@
 import { neo4j, models, http, DynamicMap } from "@hypermode/modus-sdk-as";
-import { Message, Author } from "./classes";
+import { Message, Author, MessageReference } from "./classes";
 import * as console from "as-console";
 import {
   OpenAIChatModel,
@@ -58,17 +58,19 @@ export function Discord2Neo(channel_id: string): string {
     const type = response[i].type;
     const timestamp = response[i].timestamp;
     const id = response[i].id;
+    const message_reference = response[i].message_reference;
 
-    addNode(prompt, author, type, timestamp, id);
+    addNode(prompt, author, type, timestamp, id, message_reference);
   }
 
   return 'OK'
 }
 
-export function addNode(content: string, author: Author, type: i8, timestamp: Date, id: string ): Message {
+export function addNode(content: string, author: Author, type: i8, timestamp: Date, id: string, message_reference: MessageReference  ): Message {
   const global_name = author.global_name;
   const username = author.username;
-  const query = "MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id}) RETURN n;"
+  const message_id = message_reference.message_id;
+  const query = "MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id, ref_id: $ref_id}) RETURN n;"
   const vars = new neo4j.Variables();
   vars.set("content", content);
   vars.set("global_name", global_name);
@@ -76,6 +78,7 @@ export function addNode(content: string, author: Author, type: i8, timestamp: Da
   vars.set("type", type);
   vars.set("timestamp", timestamp);
   vars.set("id", id);
+  vars.set("ref_id", message_id);
   const result = neo4j.executeQuery('neo4j', query, vars);
   const record = result.Records[0];
   const node = record.getValue<neo4j.Node>('n');
@@ -85,7 +88,9 @@ export function addNode(content: string, author: Author, type: i8, timestamp: Da
   console.log(`Keys: ${node.Props.keys()}`);
   console.log(`Global_name: ${node.Props.get<string>("global_name")}`);
   const author2 = new Author(node.Props.get<string>("username"), global_name)
-  const message = new Message(node.Props.get<string>("content"), author2, node.Props.get<i8>("type"), node.Props.get<Date>("timestamp"), node.Props.get<string>("id"));
+  const message_reference2 = new MessageReference(node.Props.get<string>("ref_id"));
+  const message = new Message(node.Props.get<string>("content"), author2, node.Props.get<i8>("type"), node.Props.get<Date>("timestamp"), node.Props.get<string>("id"), message_reference2);
+
   return message;
 }
 
