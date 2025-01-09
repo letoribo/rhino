@@ -26,11 +26,11 @@ export class Message {
     content: string;
     author: Author;
     type: i8;
-    timestamp: Date;
+    timestamp: string;
     id: string;
     message_reference: MessageReference
 
-    constructor(content: string, author: Author, type: i8, timestamp: Date, id: string, message_reference: MessageReference) {
+    constructor(content: string, author: Author, type: i8, timestamp: string, id: string, message_reference: MessageReference) {
         this.content = content;
         this.author = author;
         this.type = type;

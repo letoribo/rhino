@@ -13,7 +13,7 @@ export function Discord(channel_id: string): Message[] {
   const url = `https://discord.com/api/v10/channels/${channel_id}/messages`
 
   const response = http.fetch(url)
-  console.log(JSON.stringify(response.json<Message[]>()));
+  //console.log(JSON.stringify(response.json<Message[]>()));
   if (!response.ok) {
     throw new Error(
       `Failed to fetch messages. Received: ${response.status} ${response.statusText}`,
@@ -66,7 +66,7 @@ export function Discord2Neo(channel_id: string): string {
   return 'OK'
 }
 
-export function addNode(content: string, author: Author, type: i8, timestamp: Date, id: string, message_reference: MessageReference  ): Message {
+export function addNode(content: string, author: Author, type: i8, timestamp: string, id: string, message_reference: MessageReference  ): Message {
   const global_name = author.global_name;
   const username = author.username;
   const message_id = message_reference.message_id;
@@ -83,24 +83,9 @@ export function addNode(content: string, author: Author, type: i8, timestamp: Da
   const record = result.Records[0];
   const node = record.getValue<neo4j.Node>('n');
 
-  console.log(`Id: ${node.Props.get<string>("id")}`);
-  console.log(`Content: ${node.Props.get<string>("content")}`);
-  console.log(`Keys: ${node.Props.keys()}`);
-  console.log(`Global_name: ${node.Props.get<string>("global_name")}`);
   const author2 = new Author(node.Props.get<string>("username"), global_name)
   const message_reference2 = new MessageReference(node.Props.get<string>("ref_id"));
-  const message = new Message(node.Props.get<string>("content"), author2, node.Props.get<i8>("type"), node.Props.get<Date>("timestamp"), node.Props.get<string>("id"), message_reference2);
+  const message = new Message(node.Props.get<string>("content"), author2, node.Props.get<i8>("type"), node.Props.get<string>("timestamp"), node.Props.get<string>("id"), message_reference2);
 
   return message;
-}
-
-export function getContent(): DynamicMap {
-  //const url = "https://discord.com/api/v10/channels/1292948253796466730/messages?around=1324297283382153218&limit=1"; //not working
-  const url = "https://discord.com/api/v10/channels/1292948253796466730/messages?around=1326277761093992520&limit=1"; //not working
-    
-  const response = http.fetch(url);
-  const data = response.json<JSON.Raw>(); console.log(data);
-
-  const m = JSON.parse<DynamicMap>(data);
-  return m
 }
