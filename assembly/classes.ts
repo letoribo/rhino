@@ -28,13 +28,15 @@ export class Message {
     type: i8;
     timestamp: string;
     id: string;
+    channel_id: string;
     message_reference: MessageReference
 
-    constructor(content: string, author: Author, type: i8, timestamp: string, id: string, message_reference: MessageReference) {
+    constructor(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, message_reference: MessageReference) {
         this.content = content;
         this.author = author;
         this.type = type;
         this.timestamp = timestamp;
+        this.channel_id = channel_id;
         this.id = id;
         this.message_reference = message_reference;
     }

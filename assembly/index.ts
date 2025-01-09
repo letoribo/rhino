@@ -10,7 +10,7 @@ import {
 import { JSON } from "json-as";
 
 export function Discord(channel_id: string): Message[] {
-  const url = `https://discord.com/api/v10/channels/${channel_id}/messages`
+  const url = `https://discord.com/api/v10/channels/${channel_id}/messages?limit=2`
 
   const response = http.fetch(url)
   //console.log(JSON.stringify(response.json<Message[]>()));
@@ -60,17 +60,17 @@ export function Discord2Neo(channel_id: string): string {
     const id = response[i].id;
     const message_reference = response[i].message_reference;
 
-    addNode(prompt, author, type, timestamp, id, message_reference);
+    addNode(prompt, author, type, timestamp, id, channel_id, message_reference);
   }
 
   return 'OK'
 }
 
-export function addNode(content: string, author: Author, type: i8, timestamp: string, id: string, message_reference: MessageReference  ): Message {
+export function addNode(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, message_reference: MessageReference  ): Message {
   const global_name = author.global_name;
   const username = author.username;
   const message_id = message_reference.message_id;
-  const query = "MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id, ref_id: $ref_id}) RETURN n;"
+  const query = "MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id, channel_id: $channel_id, ref_id: $ref_id}) RETURN n;"
   const vars = new neo4j.Variables();
   vars.set("content", content);
   vars.set("global_name", global_name);
@@ -78,6 +78,7 @@ export function addNode(content: string, author: Author, type: i8, timestamp: st
   vars.set("type", type);
   vars.set("timestamp", timestamp);
   vars.set("id", id);
+  vars.set("channel_id", channel_id);
   vars.set("ref_id", message_id);
   const result = neo4j.executeQuery('neo4j', query, vars);
   const record = result.Records[0];
@@ -85,7 +86,22 @@ export function addNode(content: string, author: Author, type: i8, timestamp: st
 
   const author2 = new Author(node.Props.get<string>("username"), global_name)
   const message_reference2 = new MessageReference(node.Props.get<string>("ref_id"));
-  const message = new Message(node.Props.get<string>("content"), author2, node.Props.get<i8>("type"), node.Props.get<string>("timestamp"), node.Props.get<string>("id"), message_reference2);
+  const message = new Message(node.Props.get<string>("content"), author2, node.Props.get<i8>("type"), node.Props.get<string>("timestamp"), node.Props.get<string>("id"), node.Props.get<string>("channel_id"), message_reference2);
 
   return message;
+}
+
+export function DiscordRaw(channel_id: string): JSON.Raw {
+  const url = `https://discord.com/api/v10/channels/${channel_id}/messages?limit=10`
+  //const url = `https://discord.com/api/v10/channels/${channel_id}/messages?around=${message_id}&limit=1`
+
+  const response = http.fetch(url)
+  const data = response.json<JSON.Raw>(); console.log(data);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch messages. Received: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  return data
 }
