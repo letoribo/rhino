@@ -1,5 +1,5 @@
 import { neo4j, models, http, DynamicMap } from "@hypermode/modus-sdk-as";
-import { Message, Author, MessageReference } from "./classes";
+import { Message, Author, MessageReference, Guild } from "./classes";
 import * as console from "as-console";
 import {
   OpenAIChatModel,
@@ -94,7 +94,6 @@ export function addNode(content: string, author: Author, type: i8, timestamp: st
 export function DiscordRaw(channel_id: string): JSON.Raw {
   const url = `https://discord.com/api/v10/channels/${channel_id}/messages?limit=10`
   //const url = `https://discord.com/api/v10/channels/${channel_id}/messages?around=${message_id}&limit=1`
-
   const response = http.fetch(url)
   const data = response.json<JSON.Raw>(); console.log(data);
   if (!response.ok) {
@@ -102,6 +101,19 @@ export function DiscordRaw(channel_id: string): JSON.Raw {
       `Failed to fetch messages. Received: ${response.status} ${response.statusText}`,
     );
   }
-
   return data
+}
+
+export function DiscordGuilds (): Guild[] {
+  const url = `https://discord.com/api/v10/users/@me/guilds`
+
+  const response = http.fetch(url)
+  //const data = response.json<JSON.Raw>(); console.log(data);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch data. Received: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  return response.json<Guild[]>()
 }

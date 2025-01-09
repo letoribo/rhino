@@ -41,3 +41,16 @@ export class Message {
         this.message_reference = message_reference;
     }
 }
+
+@json
+export class Guild {
+    id: string;
+    icon: string;
+    name: string;
+  
+    constructor(id: string, icon: string, name: string) {
+        this.id = id;
+        this.icon = icon;
+        this.name = name;
+    }
+}
