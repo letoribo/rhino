@@ -60,13 +60,13 @@ export function Discord2Neo(channel_id: string): string {
     const id = response[i].id;
     const message_reference = response[i].message_reference;
 
-    addNode(prompt, author, type, timestamp, id, channel_id, message_reference);
+    addMessage(prompt, author, type, timestamp, id, channel_id, message_reference);
   }
 
   return 'OK'
 }
 
-export function addNode(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, message_reference: MessageReference  ): Message {
+export function addMessage(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, message_reference: MessageReference  ): Message {
   const global_name = author.global_name;
   const username = author.username;
   const message_id = message_reference.message_id;
@@ -127,13 +127,13 @@ export function guilds2Neo(): string {
     const icon = response[i].icon;
     const name = response[i].name;
 
-    addGuildNode(id, icon, name);
+    addGuild(id, icon, name);
   }
 
   return 'OK'
 }
 
-export function addGuildNode(id: string, icon: string, name: string  ): Guild {
+export function addGuild(id: string, icon: string, name: string  ): Guild {
   const query = "MERGE (n:Guild {id: $id, icon: $icon, name: $name}) RETURN n;"
   const vars = new neo4j.Variables();
   vars.set("id", id);
@@ -151,11 +151,44 @@ export function addGuildNode(id: string, icon: string, name: string  ): Guild {
 export function guildChannels(guild_id: string): Channel[] {
   const url = `https://discord.com/api/v10/guilds/${guild_id}/channels`
   const response = http.fetch(url)
-  const data = response.json<JSON.Raw>(); console.log(data);
+  const data = response.json<JSON.Raw>(); //console.log(data);
   if (!response.ok) {
     throw new Error(
       `Failed to fetch messages. Received: ${response.status} ${response.statusText}`,
     );
   }
   return response.json<Channel[]>()
+}
+
+export function channels2Neo(guild_id: string): string {
+  const response = guildChannels(guild_id);
+
+  for (let i = 0; i < response.length; i++) {
+    const id = response[i].id;
+    const parent_id = response[i].parent_id === 'ul' ? '' : response[i].parent_id; //console.log(parent_id);
+    const name = response[i].name; console.log(name);
+    const topic = response[i].topic === 'ul' ? '' : response[i].topic; //console.log(topic);
+    const guild_id = response[i].guild_id;
+
+    addChannel(id, parent_id, name, topic, guild_id);
+  }
+
+  return 'OK'
+}
+
+export function addChannel(id: string, parent_id: string, name: string, topic: string, guild_id: string): Channel {
+  const query = `
+  MERGE (n:Channel {id: $id, parent_id: $parent_id, name: $name, topic: $topic, guild_id: $guild_id})
+  MERGE (m:Guild {id: $guild_id})
+  MERGE (n)-[:IN]->(m)`
+  const vars = new neo4j.Variables();
+  vars.set("id", id);
+  vars.set("parent_id", parent_id);
+  vars.set("name", name);
+  vars.set("topic", topic);
+  vars.set("guild_id", guild_id);
+  neo4j.executeQuery('neo4j', query, vars);
+  
+  const channel = new Channel(id, parent_id, name, topic, guild_id);
+  return channel;
 }

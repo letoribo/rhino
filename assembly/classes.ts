@@ -62,11 +62,13 @@ export class Channel {
     parent_id: string;
     name: string;
     topic: string;
+    guild_id: string;
   
-    constructor(id: string, parent_id: string, name: string, topic: string) {
+    constructor(id: string, parent_id: string, name: string, topic: string, guild_id: string) {
         this.id = id;
         this.parent_id = parent_id;
         this.name = name;
         this.topic = topic;
+        this.guild_id = guild_id;
     }
 }
