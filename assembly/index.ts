@@ -1,5 +1,5 @@
 import { neo4j, models, http, DynamicMap } from "@hypermode/modus-sdk-as";
-import { Message, Author, MessageReference, Guild } from "./classes";
+import { Message, Author, MessageReference, Guild, Channel } from "./classes";
 import * as console from "as-console";
 import {
   OpenAIChatModel,
@@ -94,6 +94,7 @@ export function addNode(content: string, author: Author, type: i8, timestamp: st
 export function DiscordRaw(channel_id: string): JSON.Raw {
   const url = `https://discord.com/api/v10/channels/${channel_id}/messages?limit=10`
   //const url = `https://discord.com/api/v10/channels/${channel_id}/messages?around=${message_id}&limit=1`
+  //const url = `https://discord.com/api/v10/guilds/${guild_id}/channels`
   const response = http.fetch(url)
   const data = response.json<JSON.Raw>(); console.log(data);
   if (!response.ok) {
@@ -104,7 +105,7 @@ export function DiscordRaw(channel_id: string): JSON.Raw {
   return data
 }
 
-export function DiscordGuilds (): Guild[] {
+export function DiscordGuilds(): Guild[] {
   const url = `https://discord.com/api/v10/users/@me/guilds`
 
   const response = http.fetch(url)
@@ -116,4 +117,45 @@ export function DiscordGuilds (): Guild[] {
   }
 
   return response.json<Guild[]>()
+}
+
+export function guilds2Neo(): string {
+  const response = DiscordGuilds();
+
+  for (let i = 0; i < response.length; i++) { console.log(response[i].name);
+    const id = response[i].id;
+    const icon = response[i].icon;
+    const name = response[i].name;
+
+    addGuildNode(id, icon, name);
+  }
+
+  return 'OK'
+}
+
+export function addGuildNode(id: string, icon: string, name: string  ): Guild {
+  const query = "MERGE (n:Guild {id: $id, icon: $icon, name: $name}) RETURN n;"
+  const vars = new neo4j.Variables();
+  vars.set("id", id);
+  vars.set("icon", icon);
+  vars.set("name", name);
+  const result = neo4j.executeQuery('neo4j', query, vars);
+  const record = result.Records[0];
+  const node = record.getValue<neo4j.Node>('n');
+
+  const guild = new Guild(node.Props.get<string>("id"), node.Props.get<string>("icon"), node.Props.get<string>("name"));
+
+  return guild;
+}
+
+export function guildChannels(guild_id: string): Channel[] {
+  const url = `https://discord.com/api/v10/guilds/${guild_id}/channels`
+  const response = http.fetch(url)
+  const data = response.json<JSON.Raw>(); console.log(data);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch messages. Received: ${response.status} ${response.statusText}`,
+    );
+  }
+  return response.json<Channel[]>()
 }

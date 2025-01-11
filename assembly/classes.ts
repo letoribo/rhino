@@ -54,3 +54,19 @@ export class Guild {
         this.name = name;
     }
 }
+
+
+@json
+export class Channel {
+    id: string;
+    parent_id: string;
+    name: string;
+    topic: string;
+  
+    constructor(id: string, parent_id: string, name: string, topic: string) {
+        this.id = id;
+        this.parent_id = parent_id;
+        this.name = name;
+        this.topic = topic;
+    }
+}
