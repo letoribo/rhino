@@ -70,7 +70,13 @@ export function addMessage(content: string, author: Author, type: i8, timestamp:
   const global_name = author.global_name;
   const username = author.username;
   const message_id = message_reference.message_id;
-  const query = "MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id, channel_id: $channel_id, ref_id: $ref_id}) RETURN n;"
+  //const query = "MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id, channel_id: $channel_id, ref_id: $ref_id}) RETURN n;"
+  
+  const query = `
+  MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id, channel_id: $channel_id, ref_id: $ref_id})
+  MERGE (m:Channel {id: $channel_id})
+  MERGE (n)-[:IN]->(m)`
+  
   const vars = new neo4j.Variables();
   vars.set("content", content);
   vars.set("global_name", global_name);
@@ -81,12 +87,12 @@ export function addMessage(content: string, author: Author, type: i8, timestamp:
   vars.set("channel_id", channel_id);
   vars.set("ref_id", message_id);
   const result = neo4j.executeQuery('neo4j', query, vars);
-  const record = result.Records[0];
-  const node = record.getValue<neo4j.Node>('n');
+  /* const record = result.Records[0]; */
+  /* const node = record.getValue<neo4j.Node>('n'); */
 
-  const author2 = new Author(node.Props.get<string>("username"), global_name)
-  const message_reference2 = new MessageReference(node.Props.get<string>("ref_id"));
-  const message = new Message(node.Props.get<string>("content"), author2, node.Props.get<i8>("type"), node.Props.get<string>("timestamp"), node.Props.get<string>("id"), node.Props.get<string>("channel_id"), message_reference2);
+  const author2 = new Author(username, global_name)
+  const message_reference2 = new MessageReference(message_id);
+  const message = new Message(content, author2, type, timestamp, id, channel_id, message_reference2);
 
   return message;
 }
