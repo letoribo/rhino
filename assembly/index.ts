@@ -10,7 +10,7 @@ import {
 import { JSON } from "json-as";
 
 export function Discord(channel_id: string): Message[] {
-  const url = `https://discord.com/api/v10/channels/${channel_id}/messages?limit=2`
+  const url = `https://discord.com/api/v10/channels/${channel_id}/messages`
 
   const response = http.fetch(url)
   //console.log(JSON.stringify(response.json<Message[]>()));
@@ -98,9 +98,9 @@ export function addMessage(content: string, author: Author, type: i8, timestamp:
 }
 
 export function DiscordRaw(channel_id: string): JSON.Raw {
-  const url = `https://discord.com/api/v10/channels/${channel_id}/messages?limit=10`
+  //const url = `https://discord.com/api/v10/channels/${channel_id}/messages?limit=10`
   //const url = `https://discord.com/api/v10/channels/${channel_id}/messages?around=${message_id}&limit=1`
-  //const url = `https://discord.com/api/v10/guilds/${guild_id}/channels`
+  const url = `https://discord.com/api/v10/guilds/1250870606396915822/channels`
   const response = http.fetch(url)
   const data = response.json<JSON.Raw>(); console.log(data);
   if (!response.ok) {
