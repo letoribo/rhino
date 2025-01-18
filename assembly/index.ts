@@ -1,5 +1,5 @@
 import { neo4j, models, http, DynamicMap } from "@hypermode/modus-sdk-as";
-import { Message, Author, MessageReference, Guild, Channel } from "./classes";
+import { Message, Author, MessageReference, Attachment, Guild, Channel } from "./classes";
 import * as console from "as-console";
 import {
   OpenAIChatModel,
@@ -59,21 +59,33 @@ export function Discord2Neo(channel_id: string): string {
     const timestamp = response[i].timestamp;
     const id = response[i].id;
     const message_reference = response[i].message_reference;
+    
+    //const attachments = response[i].attachments; console.log(JSON.stringify(attachments));
+    const attachments = mapAttachments(response[i].attachments); //console.log(JSON.stringify(attachments));
 
-    addMessage(prompt, author, type, timestamp, id, channel_id, message_reference);
+    addMessage(prompt, author, type, timestamp, id, channel_id, message_reference, attachments);
   }
 
   return 'OK'
 }
 
-export function addMessage(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, message_reference: MessageReference  ): Message {
+const mapAttachments = (arr: Attachment[]): string[] => {
+  let attachments: string[] = []
+
+  for (let i = 0; i < arr.length; i++) {
+    const url = arr[i].url;
+    attachments.push(url)
+  }
+  return attachments
+}
+
+export function addMessage(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, message_reference: MessageReference, attachments: string[]): Message {
   const global_name = author.global_name;
   const username = author.username;
   const message_id = message_reference.message_id;
-  //const query = "MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id, channel_id: $channel_id, ref_id: $ref_id}) RETURN n;"
   
   const query = `
-  MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id, channel_id: $channel_id, ref_id: $ref_id})
+  MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id, channel_id: $channel_id, ref_id: $ref_id, attachments: $attachments})
   MERGE (m:Channel {id: $channel_id})
   MERGE (n)-[:IN]->(m)`
   
@@ -86,21 +98,29 @@ export function addMessage(content: string, author: Author, type: i8, timestamp:
   vars.set("id", id);
   vars.set("channel_id", channel_id);
   vars.set("ref_id", message_id);
+  vars.set("attachments", attachments);
   const result = neo4j.executeQuery('neo4j', query, vars);
   /* const record = result.Records[0]; */
   /* const node = record.getValue<neo4j.Node>('n'); */
 
   const author2 = new Author(username, global_name)
   const message_reference2 = new MessageReference(message_id);
-  const message = new Message(content, author2, type, timestamp, id, channel_id, message_reference2);
+  let attachments2: Attachment[] = []
+  
+  for (let i = 0; i < attachments.length; i++) {
+    const url = attachments[i];
+    attachments2.push(new Attachment(url))
+  }
+  const message = new Message(content, author2, type, timestamp, id, channel_id, message_reference2, attachments2);
 
   return message;
 }
 
 export function DiscordRaw(channel_id: string): JSON.Raw {
   //const url = `https://discord.com/api/v10/channels/${channel_id}/messages?limit=10`
-  //const url = `https://discord.com/api/v10/channels/${channel_id}/messages?around=${message_id}&limit=1`
-  const url = `https://discord.com/api/v10/guilds/1250870606396915822/channels`
+  const message_id = '1319781724456095774'
+  const url = `https://discord.com/api/v10/channels/${channel_id}/messages?around=${message_id}&limit=1`
+  //const url = `https://discord.com/api/v10/guilds/1250870606396915822/channels`
   const response = http.fetch(url)
   const data = response.json<JSON.Raw>(); console.log(data);
   if (!response.ok) {

@@ -22,6 +22,15 @@ export class MessageReference {
 }
 
 @json
+export class Attachment {
+    url: string;
+
+    constructor(url: string) {
+        this.url = url;
+    }
+}
+
+@json
 export class Message {
     content: string;
     author: Author;
@@ -30,8 +39,9 @@ export class Message {
     id: string;
     channel_id: string;
     message_reference: MessageReference
+    attachments: Attachment[] = []
 
-    constructor(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, message_reference: MessageReference) {
+    constructor(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, message_reference: MessageReference, attachments: Attachment[]) {
         this.content = content;
         this.author = author;
         this.type = type;
@@ -39,6 +49,7 @@ export class Message {
         this.channel_id = channel_id;
         this.id = id;
         this.message_reference = message_reference;
+        this.attachments = attachments;
     }
 }
 
