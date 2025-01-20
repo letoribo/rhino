@@ -1,3 +1,27 @@
+export class Node {
+    id: string;
+    name: string;
+    content: string;
+
+    constructor(id: string, name: string, content: string) {
+        this.id = id;
+        this.name = name;
+        this.content = content;
+    }
+}
+
+export class Triplet {
+    n: Node;
+    r: string;
+    m: Node;
+
+    constructor(n: Node, r: string, m: Node) {
+        this.n = n;
+        this.r = r;
+        this.m = m;
+    }
+}
+
 @json
 export class Author {
     global_name: string;

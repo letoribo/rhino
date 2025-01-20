@@ -6,7 +6,9 @@ import { JSON } from "json-as";
 import { DiscordRaw } from "./discord_raw";
 import { Discord } from "./discord";
 import { DRAG } from "./discord_rag";
-export { Discord, DiscordRaw, DRAG }
+import { GraphRAG } from "./graph_rag";
+import { getMatches } from "./records";
+export { Discord, DiscordRaw, DRAG, getMatches, GraphRAG }
 
 export function Discord2Neo(channel_id: string): string {
   const response = Discord(channel_id);
