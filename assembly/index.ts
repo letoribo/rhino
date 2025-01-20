@@ -1,53 +1,12 @@
-import { neo4j, models, http, DynamicMap } from "@hypermode/modus-sdk-as";
+import { neo4j, http } from "@hypermode/modus-sdk-as";
 import { Message, Author, MessageReference, Attachment, Guild, Channel } from "./classes";
 import * as console from "as-console";
-import {
-  OpenAIChatModel,
-  SystemMessage,
-  UserMessage,
-  Message as AIMessage
-} from "@hypermode/modus-sdk-as/models/openai/chat";
+
 import { JSON } from "json-as";
-
-export function Discord(channel_id: string): Message[] {
-  const url = `https://discord.com/api/v10/channels/${channel_id}/messages`
-
-  const response = http.fetch(url)
-  //console.log(JSON.stringify(response.json<Message[]>()));
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch messages. Received: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  return response.json<Message[]>()
-}
-
-const modelName: string = "text-generator"
-
-export function DRAG(instruction: string, channel_id: string): string {
-  const response = Discord(channel_id);
-  const prompts = response.map<string>((c) => c.content.trim());
-  
-  let messages: AIMessage[] = [new SystemMessage(instruction),]
-
-  for (let i = 0; i < prompts.length; i++) {
-    const prompt = prompts[i];
-    if (prompt.length) { console.log(prompt);
-      messages.push(new UserMessage(prompt)); 
-    }
-  }
-
-  const model = models.getModel<OpenAIChatModel>(modelName)
-  const input = model.createInput(messages)
-
-  // this is one of many optional parameters available for the OpenAI chat interface
-  input.temperature = 0.7
-
-  const output = model.invoke(input)
-  console.log(JSON.stringify(output.choices));
-  return output.choices[0].message.content.trim()
-}
+import { DiscordRaw } from "./discord_raw";
+import { Discord } from "./discord";
+import { DRAG } from "./discord_rag";
+export { Discord, DiscordRaw, DRAG }
 
 export function Discord2Neo(channel_id: string): string {
   const response = Discord(channel_id);
@@ -114,21 +73,6 @@ export function addMessage(content: string, author: Author, type: i8, timestamp:
   const message = new Message(content, author2, type, timestamp, id, channel_id, message_reference2, attachments2);
 
   return message;
-}
-
-export function DiscordRaw(channel_id: string): JSON.Raw {
-  //const url = `https://discord.com/api/v10/channels/${channel_id}/messages?limit=10`
-  const message_id = '1319781724456095774'
-  const url = `https://discord.com/api/v10/channels/${channel_id}/messages?around=${message_id}&limit=1`
-  //const url = `https://discord.com/api/v10/guilds/1250870606396915822/channels`
-  const response = http.fetch(url)
-  const data = response.json<JSON.Raw>(); console.log(data);
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch messages. Received: ${response.status} ${response.statusText}`,
-    );
-  }
-  return data
 }
 
 export function DiscordGuilds(): Guild[] {
