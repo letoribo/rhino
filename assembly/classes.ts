@@ -22,6 +22,16 @@ export class Triplet {
     }
 }
 
+export class RAGResponse {
+    answer: string;
+    retriever_result: Triplet[] = [];
+
+    constructor(answer: string, retriever_result: Triplet[]) {
+        this.answer = answer;
+        this.retriever_result = retriever_result;
+    }
+}
+
 @json
 export class Author {
     global_name: string;

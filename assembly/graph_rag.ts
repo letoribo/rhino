@@ -7,10 +7,11 @@ import {
   } from "@hypermode/modus-sdk-as/models/openai/chat";
 import { JSON } from "json-as";
 import { getMatches } from "./records";
+import { RAGResponse } from "./classes";
 
 const modelName: string = "text-generator"
 
-export function GraphRAG(instruction: string, q: string, channel_id: string): string {
+export function GraphRAG(instruction: string, q: string, channel_id: string): RAGResponse {
   const response = getMatches(q, channel_id);
 
   let messages: AIMessage[] = [new SystemMessage(instruction),]
@@ -31,5 +32,7 @@ export function GraphRAG(instruction: string, q: string, channel_id: string): st
 
   const output = model.invoke(input)
   console.log(JSON.stringify(output.choices));
-  return output.choices[0].message.content.trim()
+
+  const rag_response = new RAGResponse(output.choices[0].message.content.trim(), response);
+  return rag_response
 }
