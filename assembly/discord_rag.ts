@@ -3,7 +3,7 @@ import {
     OpenAIChatModel,
     SystemMessage,
     UserMessage,
-    Message as AIMessage
+    RequestMessage as AIMessage
   } from "@hypermode/modus-sdk-as/models/openai/chat";
 import { JSON } from "json-as";
 import { Discord } from "./discord";
