@@ -3,18 +3,19 @@ import {
     OpenAIChatModel,
     SystemMessage,
     UserMessage,
-    RequestMessage as AIMessage
+    RequestMessage
   } from "@hypermode/modus-sdk-as/models/openai/chat";
 import { JSON } from "json-as";
 import { getMatches } from "./records";
 import { RAGResponse } from "./classes";
 
 const modelName: string = "text-generator"
+//const modelName: string = "deepseek-reasoner"
 
 export function GraphRAG(instruction: string, q: string, channel_id: string): RAGResponse {
   const response = getMatches(q, channel_id);
 
-  let messages: AIMessage[] = [new SystemMessage(instruction),]
+  let messages: RequestMessage[] = [new SystemMessage(instruction),]
 
   for (let i = 0; i < response.length; i++) {
     const result = response[i];

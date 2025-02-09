@@ -43,14 +43,13 @@ export class Author {
     }
 }
 
-
 @json
 export class MessageReference {
-    //channel_id: string;
+    channel_id: string;
     message_id: string;
 
-    constructor(/* channel_id: string, */ message_id: string) {
-        //this.channel_id = channel_id;
+    constructor(channel_id: string, message_id: string) {
+        this.channel_id = channel_id;
         this.message_id = message_id;
     }
 }
@@ -65,6 +64,19 @@ export class Attachment {
 }
 
 @json
+export class Thread {
+    id: string;
+    name: string;
+    message_count: i8;
+
+    constructor(id: string, name: string, message_count: i8) {
+        this.id = id;
+        this.name = name;
+        this.message_count = message_count;
+    }
+}
+
+@json
 export class Message {
     content: string;
     author: Author;
@@ -72,18 +84,20 @@ export class Message {
     timestamp: string;
     id: string;
     channel_id: string;
-    message_reference: MessageReference
-    attachments: Attachment[] = []
+    attachments: Attachment[] = [];
+    message_reference: MessageReference | null;
+    thread: Thread | null;
 
-    constructor(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, message_reference: MessageReference, attachments: Attachment[]) {
+    constructor(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, attachments: Attachment[], message_reference: MessageReference | null, thread: Thread | null) {
         this.content = content;
         this.author = author;
         this.type = type;
         this.timestamp = timestamp;
         this.channel_id = channel_id;
         this.id = id;
-        this.message_reference = message_reference;
         this.attachments = attachments;
+        this.message_reference = message_reference/*  || null */;
+        this.thread = thread;
     }
 }
 

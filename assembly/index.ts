@@ -1,5 +1,5 @@
 import { neo4j, http } from "@hypermode/modus-sdk-as";
-import { Message, Author, MessageReference, Attachment, Guild, Channel } from "./classes";
+import { Message, Author, Attachment, MessageReference, Thread, Guild, Channel } from "./classes";
 import * as console from "as-console";
 
 import { JSON } from "json-as";
@@ -10,24 +10,24 @@ import { GraphRAG } from "./graph_rag";
 import { getMatches } from "./records";
 export { Discord, DiscordRaw, DRAG, getMatches, GraphRAG }
 
-export function Discord2Neo(channel_id: string): string {
+export function Discord2Neo(channel_id: string): Message[] {
   const response = Discord(channel_id);
+  let messages: Message[] = []
 
   for (let i = 0; i < response.length; i++) {
-    const prompt = response[i].content;
+    const content = response[i].content;
     const author = response[i].author;
     const type = response[i].type;
     const timestamp = response[i].timestamp;
     const id = response[i].id;
+    const attachments = mapAttachments(response[i].attachments);
     const message_reference = response[i].message_reference;
-    
-    //const attachments = response[i].attachments; console.log(JSON.stringify(attachments));
-    const attachments = mapAttachments(response[i].attachments); //console.log(JSON.stringify(attachments));
+    const thread = response[i].thread;
 
-    addMessage(prompt, author, type, timestamp, id, channel_id, message_reference, attachments);
+    const message = addMessage(content, author, type, timestamp, id, channel_id, attachments, message_reference, thread); //console.log(JSON.stringify(message));
+    messages.push(message)
   }
-
-  return 'OK'
+  return messages
 }
 
 const mapAttachments = (arr: Attachment[]): string[] => {
@@ -40,15 +40,9 @@ const mapAttachments = (arr: Attachment[]): string[] => {
   return attachments
 }
 
-export function addMessage(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, message_reference: MessageReference, attachments: string[]): Message {
+export function addMessage(content: string, author: Author, type: i8, timestamp: string, id: string, channel_id: string, attachments: string[], message_reference: MessageReference | null = null, thread: Thread | null = null): Message {
   const global_name = author.global_name;
   const username = author.username;
-  const message_id = message_reference.message_id;
-  
-  const query = `
-  MERGE (n:Message {content: $content, global_name: $global_name, username: $username, type: $type, timestamp: $timestamp, id: $id, channel_id: $channel_id, ref_id: $ref_id, attachments: $attachments})
-  MERGE (m:Channel {id: $channel_id})
-  MERGE (n)-[:IN]->(m)`
   
   const vars = new neo4j.Variables();
   vars.set("content", content);
@@ -58,30 +52,57 @@ export function addMessage(content: string, author: Author, type: i8, timestamp:
   vars.set("timestamp", timestamp);
   vars.set("id", id);
   vars.set("channel_id", channel_id);
-  vars.set("ref_id", message_id);
   vars.set("attachments", attachments);
-  const result = neo4j.executeQuery('neo4j', query, vars);
-  /* const record = result.Records[0]; */
-  /* const node = record.getValue<neo4j.Node>('n'); */
+  if (message_reference) { //console.log(`message_reference: ${JSON.stringify(message_reference)}`);
+    vars.set("message_reference", JSON.stringify(message_reference));
+  } else vars.set("message_reference", message_reference);
+  if (thread) {
+    vars.set("thread", JSON.stringify(thread));
+  } else vars.set("thread", thread);
+  
+  const query = `
+  MERGE (n:Message {
+    content: $content,
+    global_name: $global_name,
+    username: $username,
+    type: $type,
+    timestamp: $timestamp,
+    id: $id,
+    channel_id: $channel_id,
+    attachments: $attachments
+  })
+  WITH n
+  MATCH (m:Channel {id: $channel_id})
+  MERGE (n)-[:IN]->(m)
 
-  const author2 = new Author(username, global_name)
-  const message_reference2 = new MessageReference(message_id);
+  WITH n, $message_reference AS message_reference, $thread AS thread
+
+  FOREACH (_ IN CASE WHEN message_reference IS NOT NULL THEN [1] ELSE [] END |
+    SET n.message_reference = message_reference
+  )
+
+  FOREACH (_ IN CASE WHEN thread IS NOT NULL THEN [1] ELSE [] END |
+    SET n.thread = thread
+  )`
+  
+  const result = neo4j.executeQuery('neo4j', query, vars);
+
   let attachments2: Attachment[] = []
   
   for (let i = 0; i < attachments.length; i++) {
     const url = attachments[i];
     attachments2.push(new Attachment(url))
   }
-  const message = new Message(content, author2, type, timestamp, id, channel_id, message_reference2, attachments2);
 
+  const message = new Message(content, author, type, timestamp, id, channel_id, attachments2, message_reference || null, thread || null);
   return message;
 }
 
 export function DiscordGuilds(): Guild[] {
-  const url = `https://discord.com/api/v10/users/@me/guilds`
+  const url = `https://discord.com/api/v10/users/@me/guilds` //?limit=1&after=267624335836053506
 
   const response = http.fetch(url)
-  //const data = response.json<JSON.Raw>(); console.log(data);
+  //console.log(JSON.stringify(response.json<Guild[]>()));
   if (!response.ok) {
     throw new Error(
       `Failed to fetch data. Received: ${response.status} ${response.statusText}`,
@@ -91,18 +112,20 @@ export function DiscordGuilds(): Guild[] {
   return response.json<Guild[]>()
 }
 
-export function guilds2Neo(): string {
+export function guilds2Neo(): Guild[] {
   const response = DiscordGuilds();
+  let guilds: Guild[] = []
 
-  for (let i = 0; i < response.length; i++) { console.log(response[i].name);
+  for (let i = 0; i < response.length; i++) {
     const id = response[i].id;
     const icon = response[i].icon;
     const name = response[i].name;
 
-    addGuild(id, icon, name);
+    const guild = addGuild(id, icon, name);
+    guilds.push(guild)
   }
 
-  return 'OK'
+  return guilds
 }
 
 export function addGuild(id: string, icon: string, name: string  ): Guild {
@@ -123,7 +146,7 @@ export function addGuild(id: string, icon: string, name: string  ): Guild {
 export function guildChannels(guild_id: string): Channel[] {
   const url = `https://discord.com/api/v10/guilds/${guild_id}/channels`
   const response = http.fetch(url)
-  const data = response.json<JSON.Raw>(); //console.log(data);
+  //console.log(JSON.stringify(response.json<Channel[]>()));
   if (!response.ok) {
     throw new Error(
       `Failed to fetch messages. Received: ${response.status} ${response.statusText}`,
@@ -132,26 +155,29 @@ export function guildChannels(guild_id: string): Channel[] {
   return response.json<Channel[]>()
 }
 
-export function channels2Neo(guild_id: string): string {
+export function channels2Neo(guild_id: string): Channel[] {
   const response = guildChannels(guild_id);
+  let channels: Channel[] = []
 
   for (let i = 0; i < response.length; i++) {
     const id = response[i].id;
-    const parent_id = response[i].parent_id === 'ul' ? '' : response[i].parent_id; //console.log(parent_id);
-    const name = response[i].name; console.log(name);
+    const parent_id = response[i].parent_id === 'ul' ? '' : response[i].parent_id;
+    const name = response[i].name;
     const topic = response[i].topic === 'ul' ? '' : response[i].topic; //console.log(topic);
     const guild_id = response[i].guild_id;
 
-    addChannel(id, parent_id, name, topic, guild_id);
+    const channel = addChannel(id, parent_id, name, topic, guild_id);
+    channels.push(channel)
   }
 
-  return 'OK'
+  return channels
 }
 
 export function addChannel(id: string, parent_id: string, name: string, topic: string, guild_id: string): Channel {
   const query = `
   MERGE (n:Channel {id: $id, parent_id: $parent_id, name: $name, topic: $topic, guild_id: $guild_id})
-  MERGE (m:Guild {id: $guild_id})
+  WITH n
+  MATCH (m:Guild {id: $guild_id})
   MERGE (n)-[:IN]->(m)`
   const vars = new neo4j.Variables();
   vars.set("id", id);

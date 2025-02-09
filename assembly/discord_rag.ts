@@ -3,18 +3,19 @@ import {
     OpenAIChatModel,
     SystemMessage,
     UserMessage,
-    RequestMessage as AIMessage
+    RequestMessage
   } from "@hypermode/modus-sdk-as/models/openai/chat";
 import { JSON } from "json-as";
 import { Discord } from "./discord";
 
-const modelName: string = "text-generator"
+//const modelName: string = "text-generator"
+const modelName: string = "deepseek-reasoner"
 
 export function DRAG(instruction: string, channel_id: string): string {
   const response = Discord(channel_id);
   const prompts = response.map<string>((c) => c.content.trim());
   
-  let messages: AIMessage[] = [new SystemMessage(instruction),]
+  let messages: RequestMessage[] = [new SystemMessage(instruction),]
 
   for (let i = 0; i < prompts.length; i++) {
     const prompt = prompts[i];
