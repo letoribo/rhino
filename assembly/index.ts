@@ -4,11 +4,11 @@ import * as console from "as-console";
 
 import { JSON } from "json-as";
 import { DiscordRaw } from "./discord_raw";
-import { Discord } from "./discord";
+import { Discord, message_post } from "./discord";
 import { DRAG } from "./discord_rag";
 import { GraphRAG } from "./graph_rag";
 import { getMatches } from "./records";
-export { Discord, DiscordRaw, DRAG, getMatches, GraphRAG }
+export { Discord, message_post, DiscordRaw, DRAG, getMatches, GraphRAG }
 
 export function Discord2Neo(channel_id: string): Message[] {
   const response = Discord(channel_id);

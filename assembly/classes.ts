@@ -131,3 +131,12 @@ export class Channel {
         this.guild_id = guild_id;
     }
 }
+
+@json
+export class MessageContent {
+    content: string;
+
+    constructor(content: string) {
+        this.content = content;
+    }
+}

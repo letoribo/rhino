@@ -8,6 +8,10 @@ At least you can find out that they exist.
 
 **get channel messages**
 ![Discord](https://res.cloudinary.com/dzd5mddlm/image/upload/v1736740532/Discord/fd4bj0fjefwdbqzgukg3.png)
+
+**send a message**
+![message_post](https://res.cloudinary.com/dzd5mddlm/image/upload/v1739892426/Discord/e0splmlayr0qspcrtcr3.png)
+
 If you are not a member of the server, you will not be able to see messages, so the server channels page provides the ability to join
 ![Invite link](https://res.cloudinary.com/dzd5mddlm/image/upload/v1736745865/Discord/kycwlpuih8xlclzetebi.png)
 This video shows the transitions between frontend pages:
@@ -16,8 +20,8 @@ This video shows the transitions between frontend pages:
 **pass messages as a context to RAG**
 ![dRAG](https://res.cloudinary.com/dzd5mddlm/image/upload/v1736740216/Discord/ywnkr7u3gpxhxkhwp2cy.png)
 ## How we built it
-The app is initially written in Python and has a large set of features that you can learn about on the GraphRAG server.
-[GraphRAG](https://discord.gg/graphrag)
+The app is initially written in Python and has a large set of features that you can learn about on the [GraphRAG](https://discord.gg/graphrag) server.
+
 Although the Modus version is less extensive from the point of backend,
 but the frontend has surpassed the original application in many ways
 ## Challenges we ran into
