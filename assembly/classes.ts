@@ -140,3 +140,25 @@ export class MessageContent {
         this.content = content;
     }
 }
+
+@json
+export class ChatMessage {
+    role: string;
+    content: string;
+
+    constructor(role: string, content: string) {
+        this.role = role;
+        this.content = content;
+    }
+}
+
+@json
+export class ChatCompletion {
+    messages: ChatMessage[] = [];
+    model: string;
+
+    constructor(messages: ChatMessage[], model: string) {
+        this.messages = messages;
+        this.model = model;
+    }
+}
