@@ -1,15 +1,15 @@
 import { neo4j, http } from "@hypermode/modus-sdk-as";
 import { Message, Author, Attachment, MessageReference, Thread, Guild, Channel } from "./classes";
 import * as console from "as-console";
-
+import { Gemini } from "./gemini";
 import { JSON } from "json-as";
 import { DiscordRaw } from "./discord_raw";
 import { Groq } from "./groq";
 import { Discord, message_post } from "./discord";
-import { DRAG, GroqRAG, DGRAG } from "./discord_rag";
+import { DRAG, GroqRAG, GeminiRAG, DGRAG } from "./discord_rag";
 import { GraphRAG } from "./graph_rag";
 import { getMatches } from "./records";
-export { Discord, message_post, DiscordRaw, Groq, GroqRAG, DGRAG, DRAG, getMatches, GraphRAG }
+export { Discord, message_post, DiscordRaw, Groq, GroqRAG, Gemini, GeminiRAG, DGRAG, DRAG, getMatches, GraphRAG }
 
 export function Discord2Neo(channel_id: string): Message[] {
   const response = Discord(channel_id);

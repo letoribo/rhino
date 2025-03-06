@@ -162,3 +162,50 @@ export class ChatCompletion {
         this.model = model;
     }
 }
+
+@json
+export class ContentItem {
+    text: string;
+
+    constructor(text: string) {
+        this.text = text;
+    }
+}
+
+@json
+export class Content {
+    parts: ContentItem[] = [];
+
+    constructor(parts: ContentItem[]) {
+        this.parts = parts;
+    }
+}
+
+@json
+export class GeminiChatOutput {
+    candidates: Candidate[] = [];
+
+    constructor(candidates: Candidate[]) {
+        this.candidates = candidates;
+    }
+}
+
+@json
+export class Candidate {
+    content: Content;
+
+    constructor(content: Content) {
+        this.content = content;
+    }
+}
+
+@json
+export class GenerateResponse {
+    system_instruction: Content;
+    contents: Content;
+
+    constructor(system_instruction: Content, contents: Content) {
+        this.system_instruction = system_instruction;
+        this.contents = contents;
+    }
+}

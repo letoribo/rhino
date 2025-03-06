@@ -39,6 +39,13 @@
       "headers": {
         "Authorization": "Bearer {{TOKEN}}"
       }
+    },
+    "gemini": {
+      "type": "http",
+      "baseUrl": "https://generativelanguage.googleapis.com/v1beta/",
+      "headers": {
+        "X-Goog-Api-Key": "{{APIKEY}}"
+      }
     }
   }
 }

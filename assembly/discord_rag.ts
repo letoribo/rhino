@@ -9,7 +9,8 @@ import {
 import { JSON } from "json-as";
 import { Discord, message_post } from "./discord";
 import { Groq } from "./groq";
-import { ChatMessage, ChatCompletion } from "./classes";
+import { Gemini } from "./gemini";
+import { ChatMessage, ChatCompletion, GeminiChatOutput } from "./classes";
 import { http } from "@hypermode/modus-sdk-as";
 import * as console from "as-console";
 
@@ -61,9 +62,9 @@ export function DGRAG(instruction: string, channel_id: string): string {
   }
   const url = `https://api.groq.com/openai/v1/chat/completions`
   //const model = "llama-3.3-70b-versatile";
-  //const model = "qwen-2.5-32b";
+  const model = "qwen-2.5-32b";
   //const model = "llama-3.2-3b-preview";
-  const model = "mistral-saba-24b";
+  //const model = "mistral-saba-24b";
 
   const content = new ChatCompletion(messages, model);
   console.log(JSON.stringify(content));
@@ -82,7 +83,8 @@ export function DGRAG(instruction: string, channel_id: string): string {
       `Failed to fetch. Received: ${response.status} ${response.statusText}`,
     );
   }
-  message_post(channel_id, data.choices[0].message.content.trim())
+  //message_post(channel_id, data.choices[0].message.content.trim())
+  message_post("1250048055563124800", data.choices[0].message.content.trim())
   return data.choices[0].message.content.trim()
 }
 
@@ -91,4 +93,10 @@ export function GroqRAG(channel_id: string, message: string): string {
   //message_post("1250048055563124800", response);
   message_post(channel_id, response);
   return response
+}
+
+export function GeminiRAG(instruction: string, message: string, channel_id: string): GeminiChatOutput {
+  const response = Gemini(instruction, message);
+  message_post(channel_id, response.candidates[0].content.parts[0].text);
+  return new GeminiChatOutput(response.candidates)
 }
