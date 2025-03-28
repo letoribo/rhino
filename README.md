@@ -25,8 +25,8 @@ The app is initially written in Python and has a large set of features that you 
 Although the Modus version is less extensive from the point of backend,
 but the frontend has surpassed the original application in many ways
 ## Challenges we ran into
-Apparently Discord decided to apply restrictions and now I can only get 2 messages in Discord guild via HTTP API.
-Discord has strict rate limits on API requests. If you've made too many requests in a short period, you may be temporarily limited in the number of messages you can retrieve.
+Apparently I haven't visited my workspace for a long time
+and now it's 404 Not Found.
 ## Accomplishments that we're proud of
 I opened an issue
 [Adding nodes in Neo4j](https://github.com/hypermodeinc/modus/issues/671)
